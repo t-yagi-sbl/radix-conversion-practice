@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>基数変換トレーニング</title>
+　<meta charset="utf-8">
+  <style>
+    body {
+		font-family: sans-serif;
+		padding: 20px;
+		max-width: 600px;
+		margin: 0 auto;
+		background:#0E0E0E;
+		color: aliceblue;
+	  }
+    input, button {
+		padding: 5px;
+		margin-top: 10px;
+	  }
+    #stats { 
+		margin-top: 20px;
+	  }
+    table { 
+		border-collapse: collapse;
+		width: 100%;
+		margin-top: 10px;
+	  }
+    th, td {
+		border: 1px solid #ccc;
+		padding: 5px;
+		text-align: center; 
+	  }
+	  .statscount{
+		  display: inline-block;
+		  margin-right: 30px;
+	  }
+	  button{
+		  display: flex;
+		  align-items: center;
+		  justify-content: center;
+		  
+	  }
+
+  </style>
+</head>
+<body>
+	<h1>基数変換トレーニング</h1>
+	<div class="content">
+		<div id="question"></div>
+
+		<input type="text" id="answer" placeholder="答えを入力">
+		<button onclick="checkAnswer()">答える</button>
+	</div>
+	<div id="result"></div>
+
+	<div id="stats">
+	  <p class="statscount">✅ 正解数: <span id="correct">0</span></p>
+	  <p class="statscount">❌ 不正解数: <span id="incorrect">0</span></p>
+
+	  <h3>変換ごとの平均回答時間</h3>
+	  <table>
+		<thead>
+		  <tr><th>変換</th><th>回数</th><th>平均時間（秒）</th></tr>
+		</thead>
+		<tbody id="timeStats">
+		</tbody>
+	  </table>
+	</div>
+
+	<script>
+	  const bases = [2, 8, 10, 16];
+	  let fromBase, toBase, number, correctAnswer;
+	  let correctCount = 0, incorrectCount = 0;
+	  let startTime;
+
+	  const timeData = {}; // e.g. {"2→10": { count: 3, totalTime: 15 }}
+
+	  function generateQuestion() {
+		do {
+		  fromBase = bases[Math.floor(Math.random() * bases.length)];
+		  toBase = bases[Math.floor(Math.random() * bases.length)];
+		} while (fromBase === toBase);
+
+		number = Math.floor(Math.random() * 255) + 1;
+		const displayNum = number.toString(fromBase).toUpperCase();
+		correctAnswer = number.toString(toBase).toUpperCase();
+
+		document.getElementById("question").textContent =
+		  `変換せよ：${displayNum}（基数 ${fromBase}）→ 基数 ${toBase}`;
+		document.getElementById("result").textContent = "";
+		document.getElementById("answer").value = "";
+		startTime = Date.now();
+	  }
+
+	  function checkAnswer() {
+		const userAns = document.getElementById("answer").value.trim().toUpperCase();
+		const timeTaken = (Date.now() - startTime) / 1000; // 秒
+
+		const key = `${fromBase}→${toBase}`;
+		if (!timeData[key]) timeData[key] = { count: 0, totalTime: 0 };
+		timeData[key].count += 1;
+		timeData[key].totalTime += timeTaken;
+
+		if (userAns === correctAnswer) {
+		  correctCount++;
+		  document.getElementById("result").textContent = `正解！🎉 (${timeTaken.toFixed(2)} 秒)`;
+		  document.getElementById("result").style.color = "green";
+		} else {
+		  incorrectCount++;
+		  document.getElementById("result").textContent =
+			`不正解 😢 正解は ${correctAnswer}（${timeTaken.toFixed(2)} 秒）`;
+		  document.getElementById("result").style.color = "red";
+		}
+
+		updateStats();
+		setTimeout(generateQuestion, 1000);
+	  }
+
+	  function updateStats() {
+		document.getElementById("correct").textContent = correctCount;
+		document.getElementById("incorrect").textContent = incorrectCount;
+
+		const tbody = document.getElementById("timeStats");
+		tbody.innerHTML = "";
+		for (const key in timeData) {
+		  const { count, totalTime } = timeData[key];
+		  const avg = (totalTime / count).toFixed(2);
+		  const row = `<tr><td>${key}</td><td>${count}</td><td>${avg}</td></tr>`;
+		  tbody.innerHTML += row;
+		}
+	  }
+
+	  generateQuestion();
+		
+	　function checkAnswer() {
+	  const userAns = document.getElementById("answer").value.trim().toUpperCase();
+	  const timeTaken = (Date.now() - startTime) / 1000; // 秒
+
+	  const key = `${fromBase}→${toBase}`;
+	  if (!timeData[key]) timeData[key] = { count: 0, totalTime: 0 };
+
+	  if (userAns === correctAnswer) {
+		// 正解処理
+		correctCount++;
+		timeData[key].count += 1;
+		timeData[key].totalTime += timeTaken;
+
+		document.getElementById("result").textContent = `正解！🎉 (${timeTaken.toFixed(2)} 秒)`;
+		document.getElementById("result").style.color = "green";
+		updateStats();
+
+		setTimeout(generateQuestion, 1000); // 1秒後に次の問題へ
+	  } else {
+		// 不正解処理（問題はそのまま）
+		incorrectCount++;
+		document.getElementById("result").textContent = `不正解です 😢`;
+		document.getElementById("result").style.color = "red";
+		updateStats();
+		// 次の問題には進まない
+	  }
+	 }
+
+	</script>
+
+</body>
+</html>
